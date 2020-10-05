@@ -108,8 +108,6 @@ namespace QReview.Mappers
             SetMappedVerticals(dischargeSection, summary);
 
             SetChannelObservations(dischargeSection, summary, unitSystem);
-
-            dischargeActivity.ChannelMeasurements.Add(dischargeSection);
         }
 
         private ManualGaugingDischargeSection CreateDischargeSectionWithDescription(DischargeActivity dischargeActivity,
