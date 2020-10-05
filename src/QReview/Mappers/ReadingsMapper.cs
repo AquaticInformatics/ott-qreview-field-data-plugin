@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using FieldDataPluginFramework.Context;
+using FieldDataPluginFramework.DataModel;
 using FieldDataPluginFramework.DataModel.Readings;
 using QReview.SystemCode;
 
@@ -19,7 +20,10 @@ namespace QReview.Mappers
         {
             if (summary.MeanTemp.HasValue)
             {
-                yield return new Reading(Parameters.WaterTemp, Units.Celcius, summary.MeanTemp);
+                yield return new Reading(Parameters.WaterTemp, new Measurement(summary.MeanTemp.Value, Units.Celcius))
+                {
+                    DateTimeOffset = FieldVisitInfo.StartDate
+                };
             }
         }
     }
