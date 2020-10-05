@@ -1,6 +1,6 @@
 # QRev Field Data Plugin
 
-[![Build status](https://ci.appveyor.com/api/projects/status/o04tlahqy188fcos/branch/master?svg=true)](https://ci.appveyor.com/project/SystemsAdministrator/qrev-field-data-plugin/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/c6o6vyilyc0oi5cc/branch/master?svg=true)](https://ci.appveyor.com/project/SystemsAdministrator/ott-qreview-field-data-plugin/branch/master)
 
 An AQTS field data plugin for AQTS 2020.2-or-newer systems, which can import ADCP discharge summary measurements from the [OTT QReview software](https://www.ott.com/products/water-flow-3/ott-mf-pro-water-flow-meter-968/).
 
