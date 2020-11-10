@@ -67,8 +67,13 @@ namespace QReview.Mappers
 
             dischargeActivity.QualityAssuranceComments = string.Join("\n", qualityIssues);
 
-            if (!string.IsNullOrEmpty(summary.Quality) && Config.Grades.TryGetValue(summary.Quality, out var gradeText))
+            if (!string.IsNullOrEmpty(summary.Quality) && Config.Grades.Any())
             {
+                if (!Config.Grades.TryGetValue(summary.Quality, out var gradeText))
+                {
+                    gradeText = summary.Quality;
+                }
+
                 dischargeActivity.MeasurementGrade = int.TryParse(gradeText, out var gradeCode)
                     ? Grade.FromCode(gradeCode)
                     : Grade.FromDisplayName(gradeText);
