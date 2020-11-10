@@ -19,17 +19,18 @@ The JSON configuration information stores four settings:
 
 | Property Name | Description |
 | --- | --- |
-| **Grades** | How to map the QReview `Quality` property to an AQTS grade.<br/><br/>If empty, no measurement grade will be assigned. |
-| **DateTimeFormats** | .NET date & time format strings for parsing the `Date/Time` summary field.<br/><br/>If empty, US-English formats will be expected. |
+| **Grades** | How to map the QReview `Quality` property to an AQTS grade.<br/><br/>If not empty, the `Quality` value will be mapped to a `GradeCode` if it is an integer number, or to a `GradeName` otherwise. When the `Quality` value is not in the `Grades` map, the value is assumed to map 1:1 to a grade code or name.<br/><br/>If empty, no measurement grade will be assigned. |
+| **DateTimeFormats** | .NET date & time format strings for parsing the `Date/Time` summary field.<br/><br/>If empty, US-English formats will be expected. (month/day/year) |
 | **TimeFormats** | .NET time format strings for parsing times.<br/><br/>If empty, US-English formats will be expected. |
-
 
 ```json
 {
   "Grades": {
+    "UNKNOWN": "POOR",
+    "GOOD": "85"
   },
-  "DateTimeFormats": [],
-  "TimeFormats": []
+  "DateTimeFormats": [ "dd-MM-yyyy HH:mm:ss" ],
+  "TimeFormats": [ "HH:mm:ss" ]
 }
 ```
 

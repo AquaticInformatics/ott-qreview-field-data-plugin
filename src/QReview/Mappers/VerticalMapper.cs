@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using FieldDataPluginFramework.DataModel;
 using FieldDataPluginFramework.DataModel.ChannelMeasurements;
@@ -27,9 +26,6 @@ namespace QReview.Mappers
                 yield break;
 
             ObservationSeconds = summary.AveragingTime ?? 20;
-
-            var minNumber = summary.Verticals.Min(v => v.Number);
-            var maxNumber = summary.Verticals.Max(v => v.Number);
 
             foreach (var vertical in summary.Verticals.Select(Map))
             {
@@ -58,11 +54,11 @@ namespace QReview.Mappers
         {
             return new Segment
             {
-                Area = vertical.Area,
-                Discharge = vertical.Discharge,
-                Velocity = vertical.MeanVelocity,
-                Width = vertical.Area / vertical.Depth,
-                TotalDischargePortion = vertical.DischargePortion
+                Area = vertical.Area ?? 0,
+                Discharge = vertical.Discharge ?? 0,
+                Velocity = vertical.MeanVelocity ?? 0,
+                Width = vertical.Area / vertical.Depth ?? 0,
+                TotalDischargePortion = vertical.DischargePortion ?? 0,
             };
         }
 
@@ -80,7 +76,7 @@ namespace QReview.Mappers
             {
                 MeterCalibration = MeterCalibration,
                 VelocityObservationMethod = observationType.Type,
-                MeanVelocity = vertical.MeanVelocity,
+                MeanVelocity = vertical.MeanVelocity ?? 0,
                 DeploymentMethod = DeploymentMethodType.Unspecified,
             };
 
@@ -107,7 +103,7 @@ namespace QReview.Mappers
                 Depth = vertical.Depth * percentageDepth / 100.0,
                 ObservationInterval = ObservationSeconds,
                 RevolutionCount = 0,
-                Velocity = vertical.MeanVelocity
+                Velocity = vertical.MeanVelocity ?? 0
             };
         }
     }
