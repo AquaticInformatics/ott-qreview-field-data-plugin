@@ -77,7 +77,7 @@ namespace QReview
                 var tsvParser = new TextFieldParser(reader)
                 {
                     TextFieldType = FieldType.Delimited,
-                    Delimiters = new[] {"\t"},
+                    Delimiters = new[] { "\t" },
                     TrimWhiteSpace = true,
                     HasFieldsEnclosedInQuotes = false,
                 };
@@ -162,6 +162,8 @@ namespace QReview
                         {SectionType.TimeSeries, (null, ParseTimeSeries)},
                     };
 
+                var sectionsParsed = new Dictionary<SectionType, int>();
+                var fieldsParsed = 0;
 
                 while (!tsvParser.EndOfData)
                 {
@@ -184,6 +186,12 @@ namespace QReview
                         throw new InvalidOperationException(
                             $"Don't know how to parse line {LineNumber} ({sectionType}): {string.Join(",", Fields)}");
 
+                    if (!sectionsParsed.TryGetValue(sectionType, out var count))
+                    {
+                        count = 0;
+                    }
+
+                    sectionsParsed[sectionType] = 1 + count;
 
                     if (parser.FieldParsers != null)
                     {
@@ -196,6 +204,7 @@ namespace QReview
                             {
                                 fieldAction(Fields[i + 1]);
                                 ++i;
+                                ++fieldsParsed;
                             }
                         }
                     }
@@ -204,6 +213,9 @@ namespace QReview
                 }
 
                 SortVerticalsByPosition();
+
+                if (fieldsParsed < 5 || sectionsParsed.Count < 2)
+                    return null;
 
                 return Summary;
             }
