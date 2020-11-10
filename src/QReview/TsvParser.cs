@@ -51,10 +51,10 @@ namespace QReview
         public int Points { get; set; }
         public double Position { get; set; }
         public double Depth { get; set; }
-        public double MeanVelocity { get; set; }
-        public double Area { get; set; }
-        public double Discharge { get; set; }
-        public double DischargePortion { get; set; }
+        public double? MeanVelocity { get; set; }
+        public double? Area { get; set; }
+        public double? Discharge { get; set; }
+        public double? DischargePortion { get; set; }
         public List<string> QualityIssues { get; } = new List<string>();
         public List<string> Warnings { get; } = new List<string>();
     }
@@ -162,6 +162,7 @@ namespace QReview
                         {SectionType.TimeSeries, (null, ParseTimeSeries)},
                     };
 
+
                 while (!tsvParser.EndOfData)
                 {
                     LineNumber = tsvParser.LineNumber;
@@ -183,6 +184,7 @@ namespace QReview
                         throw new InvalidOperationException(
                             $"Don't know how to parse line {LineNumber} ({sectionType}): {string.Join(",", Fields)}");
 
+
                     if (parser.FieldParsers != null)
                     {
                         for (var i = 0; i < Fields.Length - 1; ++i)
@@ -201,8 +203,21 @@ namespace QReview
                     parser.ParseAction?.Invoke();
                 }
 
+                SortVerticalsByPosition();
+
                 return Summary;
             }
+        }
+
+        private void SortVerticalsByPosition()
+        {
+            var verticals = Summary
+                .Verticals
+                .OrderBy(v => v.Position)
+                .ToList();
+
+            Summary.Verticals.Clear();
+            Summary.Verticals.AddRange(verticals);
         }
 
         private enum SectionType
@@ -459,16 +474,17 @@ namespace QReview
             if (Fields.Length < 9)
                 return;
 
+            var time = ParseTime(Summary.StartTime ?? throw new ArgumentException($"Line {LineNumber}: No start time context available"), Fields[0]);
+
             var vertical = GetOrAddVertical(ParseInteger(Fields[1]));
-            var timeText = Fields[0];
-            vertical.Time = ParseTime(Summary.StartTime ?? throw new ArgumentException($"Line {LineNumber}: No start time context available"), timeText);
+            vertical.Time = time;
             vertical.Points = ParseInteger(Fields[2]);
             vertical.Position = ParseDouble(Fields[3]);
             vertical.Depth = ParseDouble(Fields[4]);
-            vertical.MeanVelocity = ParseDouble(Fields[5]);
-            vertical.Area = ParseDouble(Fields[6]);
-            vertical.Discharge = ParseDouble(Fields[7]);
-            vertical.DischargePortion = ParseDouble(Fields[8]);
+            vertical.MeanVelocity = ParseNullableDouble(Fields[5]);
+            vertical.Area = ParseNullableDouble(Fields[6]);
+            vertical.Discharge = ParseNullableDouble(Fields[7]);
+            vertical.DischargePortion = ParseNullableDouble(Fields[8]);
         }
     }
 }
