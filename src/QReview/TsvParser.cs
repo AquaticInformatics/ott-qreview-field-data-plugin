@@ -31,6 +31,7 @@ namespace QReview
         public double? MeanVelocity { get; set; }
         public double? GageStart { get; set; }
         public double? Width { get; set; }
+        // ReSharper disable once InconsistentNaming
         public double? MeanSNR { get; set; }
         public double? GageEnd { get; set; }
         public double? Area { get; set; }
@@ -49,7 +50,7 @@ namespace QReview
         public int Number { get; set; }
         public DateTime Time { get; set; }
         public int Points { get; set; }
-        public double Position { get; set; }
+        public double? Position { get; set; }
         public double Depth { get; set; }
         public double? MeanVelocity { get; set; }
         public double? Area { get; set; }
@@ -169,7 +170,8 @@ namespace QReview
                 {
                     LineNumber = tsvParser.LineNumber;
 
-                    Fields = tsvParser.ReadFields();
+                    Fields = ReadFields(tsvParser);
+
                     if (Fields == null)
                         continue;
 
@@ -221,10 +223,33 @@ namespace QReview
             }
         }
 
+        private static string[] ReadFields(TextFieldParser tsvParser)
+        {
+            var rawFields = tsvParser.ReadFields();
+
+            if (rawFields == null)
+                return null;
+
+            var fields =  new List<string>(rawFields);
+
+            for (var i = fields.Count - 1; i > 0; --i)
+            {
+                var field = fields[i];
+
+                if (!string.IsNullOrEmpty(field))
+                    break;
+
+                fields.RemoveAt(i);
+            }
+
+            return fields.ToArray();
+        }
+
         private void SortVerticalsByPosition()
         {
             var verticals = Summary
                 .Verticals
+                .Where(v => v.Points > 0 || v.Position.HasValue)
                 .OrderBy(v => v.Position)
                 .ToList();
 
@@ -241,6 +266,7 @@ namespace QReview
             QualitySettings,
             FieldQualityCheck,
             Notes,
+            // ReSharper disable once InconsistentNaming
             ADCWarnings,
             QualityIssues,
             TimeSeries,
@@ -496,7 +522,7 @@ namespace QReview
             vertical.MeanVelocity = ParseNullableDouble(Fields[5]);
             vertical.Area = ParseNullableDouble(Fields[6]);
             vertical.Discharge = ParseNullableDouble(Fields[7]);
-            vertical.DischargePortion = ParseNullableDouble(Fields[8]);
+            vertical.DischargePortion = ParseNullableDouble(Fields[8].Replace("*", ""));
         }
     }
 }
