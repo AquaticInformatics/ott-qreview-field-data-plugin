@@ -39,7 +39,7 @@ namespace QReview.Mappers
             {
                 Segment = GetSegment(vertical),
                 MeasurementConditionData = new OpenWaterData(), // TODO: Support ice?
-                TaglinePosition = vertical.Position,
+                TaglinePosition = vertical.Position ?? throw new InvalidOperationException($"Vertical {vertical.Number} has no known position"),
                 SequenceNumber = vertical.Number,
                 MeasurementTime = GetMeasurementTime(vertical),
                 VerticalType = VerticalType.MidRiver, //TODO: is this correct?
@@ -77,7 +77,7 @@ namespace QReview.Mappers
                 MeterCalibration = MeterCalibration,
                 VelocityObservationMethod = observationType.Type,
                 MeanVelocity = vertical.MeanVelocity ?? 0,
-                DeploymentMethod = DeploymentMethodType.Unspecified,
+                DeploymentMethod = DeploymentMethodType.Unspecified
             };
 
             foreach (var percentageDepth in observationType.PercentageDepths)
@@ -93,7 +93,11 @@ namespace QReview.Mappers
             {
                 {1, (PointVelocityObservationType.OneAtPointSix, new []{60})},
                 {2, (PointVelocityObservationType.OneAtPointTwoAndPointEight, new []{20,80})},
-                {3, (PointVelocityObservationType.OneAtPointTwoPointSixAndPointEight, new []{20,60,80})}
+                {3, (PointVelocityObservationType.OneAtPointTwoPointSixAndPointEight, new []{20,60,80})},
+                // Some OTT files have 4 to 6 measurements. Just hack it as if there were 3. It appears these extra points are re-measured depths anyways
+                {4, (PointVelocityObservationType.OneAtPointTwoPointSixAndPointEight, new []{20,60,80})},
+                {5, (PointVelocityObservationType.OneAtPointTwoPointSixAndPointEight, new []{20,60,80})},
+                {6, (PointVelocityObservationType.OneAtPointTwoPointSixAndPointEight, new []{20,60,80})},
             };
 
         private VelocityDepthObservation GetVelocityDepthObservation(VerticalSummary vertical, int percentageDepth)
