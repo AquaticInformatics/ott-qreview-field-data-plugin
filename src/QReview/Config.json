@@ -1,4 +1,6 @@
 ﻿{
+  "LocationIdentifierSeparator": "_",
+  "LocationIdentifierZeroPaddedDigits": 6,
   "Grades": {
   },
   "DateTimeFormats": [],

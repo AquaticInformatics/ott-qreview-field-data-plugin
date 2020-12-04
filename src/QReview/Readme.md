@@ -4,6 +4,25 @@ The QReview plugin will work with stock AQTS 2020.2 systems with no special conf
 
 But if you have changed the configuration of some of your AQTS system's configurable "Drop-down Lists", then you may need to tell the QRev plugin how to correctly interpret a few key fields.
 
+## How the plugin extracts the AQUARIUS location identifier from the `Summary.TSV` file
+
+In order to get a smooth drag-and-drop import experience from AQUARIUS Springboard, the plugin needs to know the AQUARIUS location for which the measurement was taken. The location identifier is derived from the  **Station Name** entered into the OTT ADC or QLiner device.
+
+Out of the box, the plugin uses some configurable rules to extract the AQUARIUS location identifier from the OTT Station Name field.
+
+- Strip all trailing text starting with the first underscore `_` encountered. The **LocationIdentifierSeparator** property can be configured to control this behaviour.
+- If the remaining text is a number, pad it to the left with up to 6 zeroes. The **LocationIdentifierZeroPaddedDigits** property can be configured to control this behaviour.
+
+These rules will allow for an agency naming standard of "{LocationIdentifier}_{YYYYMMDD}" as a station name pattern. Your agency may use a different naming convention and can configure the rules accordingly.
+
+| Station Name | AQUARIUS Location Identifier | Description |
+| --- | --- | --- |
+| `000744_191223` | `000744` | A measurement taken on Dec 23rd, 2019. |
+| `0744__191223` | `000744` | A measurement taken on Dec 23rd, 2019, but the operator was sloppy and didn't quite follow the standard, not fully using the 6-digit location identifier syntax, and accidentally use two underscores. |
+| `084A_200415 (2)` | `084A` | The text before the first underscore wasn't a valid number, so it was not zero padded. It was just used as-is. | 
+
+If the extracted location identifier doesn't exist in AQUARIUS, the measurement file will not be able to be dropped on the main Springboard drop target. But it can still be uploaded to an existing location by launch the Location Manager page and using the Upload tab.
+
 ## The `Config.json` file stores the plugin's configuration
 
 The plugin can be configured via a [`Config.json`](./Config.json) JSON document, to control the date and time formats used by your organization.
@@ -15,16 +34,20 @@ Use the Settings page of the System Config app to change the configuration setti
 
 This JSON document is reloaded each time a QRev file is uploaded to AQTS for parsing. Updates to the setting will take effect on the next QRev file parsed.
 
-The JSON configuration information stores four settings:
+The JSON configuration information stores five settings:
 
 | Property Name | Description |
 | --- | --- |
+| **LocationIdentifierSeparator** | A text string that will separate a location identifier from other text in the Station Name.<br/><br/>Use an empty string `""` to use the entire Station Name.<br/><br/>Defaults to an underscore `"_"` if the property is not specified.|
+| **LocationIdentifierZeroPaddedDigits** | The number of zero-padded digits to use for a numeric location identifier.<br/><br/>Defaults to `6` if the property is not specified. |
 | **Grades** | How to map the QReview `Quality` property to an AQTS grade.<br/><br/>If not empty, the `Quality` value will be mapped to a `GradeCode` if it is an integer number, or to a `GradeName` otherwise. When the `Quality` value is not in the `Grades` map, the value is assumed to map 1:1 to a grade code or name.<br/><br/>If empty, no measurement grade will be assigned. |
 | **DateTimeFormats** | .NET date & time format strings for parsing the `Date/Time` summary field.<br/><br/>If empty, US-English formats will be expected. (month/day/year) |
 | **TimeFormats** | .NET time format strings for parsing times.<br/><br/>If empty, US-English formats will be expected. |
 
 ```json
 {
+  "LocationIdentifierSeparator": "_",
+  "LocationIdentifierZeroPaddedDigits": 6,
   "Grades": {
     "UNKNOWN": "POOR",
     "GOOD": "85"

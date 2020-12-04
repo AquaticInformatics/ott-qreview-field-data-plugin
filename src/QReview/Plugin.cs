@@ -29,10 +29,12 @@ namespace QReview
 
                 if (targetLocation == null)
                 {
-                    if (string.IsNullOrEmpty(summary.StationName))
+                    var locationIdentifier = ExtractLocationIdentifier(summary.StationName);
+
+                    if (string.IsNullOrEmpty(locationIdentifier))
                         return ParseFileResult.SuccessfullyParsedButDataInvalid("Missing station name");
 
-                    targetLocation = appender.GetLocationByIdentifier(summary.StationName);
+                    targetLocation = appender.GetLocationByIdentifier(locationIdentifier);
                 }
 
                 var parser = new Parser(Config, targetLocation, appender, logger);
@@ -45,6 +47,29 @@ namespace QReview
             {
                 return ParseFileResult.SuccessfullyParsedButDataInvalid(e.Message);
             }
+        }
+
+        private string ExtractLocationIdentifier(string stationName)
+        {
+            var locationIdentifier = stationName;
+
+            if (string.IsNullOrEmpty(locationIdentifier))
+                return locationIdentifier;
+
+            if (!string.IsNullOrEmpty(Config.LocationIdentifierSeparator))
+            {
+                locationIdentifier = locationIdentifier
+                    .Split(new[] {Config.LocationIdentifierSeparator}, StringSplitOptions.None)
+                    [0];
+            }
+
+            if (!int.TryParse(locationIdentifier, out var numericValue))
+                return locationIdentifier;
+
+            if (Config.LocationIdentifierZeroPaddedDigits < 1)
+                return locationIdentifier;
+
+            return numericValue.ToString($"D{Config.LocationIdentifierZeroPaddedDigits}");
         }
 
         private DischargeMeasurementSummary GetSummary(Stream fileStream, ILog logger)
