@@ -1,4 +1,4 @@
-# QRev Field Data Plugin
+# OTT QReview Field Data Plugin
 
 [![Build status](https://ci.appveyor.com/api/projects/status/c6o6vyilyc0oi5cc/branch/master?svg=true)](https://ci.appveyor.com/project/SystemsAdministrator/ott-qreview-field-data-plugin/branch/master)
 
