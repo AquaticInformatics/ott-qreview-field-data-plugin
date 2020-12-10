@@ -2,7 +2,10 @@
 
 The QReview plugin will work with stock AQTS 2020.2 systems with no special configuration required.
 
-But if you have changed the configuration of some of your AQTS system's configurable "Drop-down Lists", then you may need to tell the QRev plugin how to correctly interpret a few key fields.
+But you may need to configure the QReview plugin if:
+- Your agency uses custom grade definitions in QReview software or in AQTS. Configure the **Grades** property to match.
+- Your agency uses a non-US-English date or time formats when using QReview to export data. Configure the **DateTimeFormats** and **TimeFormats** properties to match.
+- Your agency does not use the entire **StationName** field to store the AQTS location identifier. Configure the **LocationIdentifierSeparator** and **LocationIdentifierZeroPaddedDigits** properties to match.
 
 ## How the plugin extracts the AQUARIUS location identifier from the `Summary.TSV` file
 
@@ -32,7 +35,7 @@ Use the Settings page of the System Config app to change the configuration setti
 - **Key**: `Config`<br/>
 - **Value**: The entire contents of the Config.json file. If blank or omitted, the plugin's default [`Config.json`](./Config.json) is used.
 
-This JSON document is reloaded each time a QRev file is uploaded to AQTS for parsing. Updates to the setting will take effect on the next QRev file parsed.
+This JSON document is reloaded each time a QReview file is uploaded to AQTS for parsing. Updates to the setting will take effect on the next QReview file parsed.
 
 The JSON configuration information stores five settings:
 
