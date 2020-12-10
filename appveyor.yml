@@ -40,7 +40,7 @@ artifacts:
 deploy:
   - provider: GitHub
     tag: v$(APPVEYOR_BUILD_VERSION)
-    release: QRev field data plugin $(APPVEYOR_BUILD_VERSION)
+    release: OTT QReview field data plugin $(APPVEYOR_BUILD_VERSION)
     description: ''
     artifact: ThePlugin
     auth_token: $(GITHUB_AUTH_TOKEN)
