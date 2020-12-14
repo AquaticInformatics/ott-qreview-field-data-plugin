@@ -135,6 +135,8 @@ namespace QReview
                         {"Gage End:", s => Summary.GageEnd = ParseNullableDouble(s)},
                         {"Area(m²)", s => Summary.Area = ParseNullableDouble(s)},
                         {"Area(ft²)", s => Summary.Area = ParseNullableDouble(s)},
+                        {"Area(m²", s => Summary.Area = ParseNullableDouble(s)},  // Compensate for buggy QReview output
+                        {"Area(ft²", s => Summary.Area = ParseNullableDouble(s)}, // Compensate for buggy QReview output
                         {"Discharge(m³/s)", s => Summary.Discharge = ParseNullableDischarge(s)},
                         {"Discharge(ft³/s)", s => Summary.Discharge = ParseNullableDischarge(s)},
                         {
