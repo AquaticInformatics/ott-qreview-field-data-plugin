@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using FieldDataPluginFramework.Results;
-using ServiceStack;
 
 namespace QReview
 {
@@ -18,18 +16,70 @@ namespace QReview
 
         public Config Load()
         {
-            if (!Settings.TryGetValue(nameof(Config), out var jsonText) || string.IsNullOrWhiteSpace(jsonText))
-                return Sanitize(new Config());
+            var config = new Config
+            {
+                LocationIdentifierSeparator = GetNullableString(nameof(Config.LocationIdentifierSeparator)) ?? Config.DefaultLocationIdentifierSeparator,
+                LocationIdentifierZeroPaddedDigits = GetNullableInteger(nameof(Config.LocationIdentifierZeroPaddedDigits)) ?? Config.DefaultLocationIdentifierZeroPaddedDigits,
+                IgnoreMeasurementId = GetNullableBoolean(nameof(Config.IgnoreMeasurementId)) ?? Config.DefaultIgnoreMeasurementId,
+                DateTimeFormats = GetStrings(nameof(Config.DateTimeFormats)),
+                TimeFormats = GetStrings(nameof(Config.TimeFormats)),
+                Grades = GetMap(nameof(Config.Grades)),
+            };
 
-            try
-            {
-                return Sanitize(jsonText.FromJson<Config>());
-            }
-            catch (SerializationException exception)
-            {
-                throw new ArgumentException($"Invalid Config JSON:\b{jsonText}", exception);
-            }
+            return Sanitize(config);
         }
+
+        private string GetNullableString(string key)
+        {
+            return Settings.TryGetValue(key, out var value) ? value : null;
+        }
+
+        private int? GetNullableInteger(string key)
+        {
+            var text = GetNullableString(key);
+
+            if (int.TryParse(text, out var value))
+                return value;
+
+            return null;
+        }
+
+
+        private bool? GetNullableBoolean(string key)
+        {
+            var text = GetNullableString(key);
+
+            if (bool.TryParse(text, out var value))
+                return value;
+
+            return null;
+        }
+
+        private string[] GetStrings(string key)
+        {
+            var text = GetNullableString(key);
+
+            if (string.IsNullOrWhiteSpace(text))
+                return null;
+
+            return text
+                .Split(',')
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .ToArray();
+        }
+
+        private Dictionary<string, string> GetMap(string key)
+        {
+            var strings = GetStrings(key);
+
+            return strings?.Select(s => s.Split(MapSeparators, 2))
+                .Where(values => values.Length == 2)
+                .ToDictionary(
+                    values => values[0],
+                    values => values[1]);
+        }
+
+        private static readonly char[] MapSeparators = {':'};
 
         private Config Sanitize(Config config)
         {

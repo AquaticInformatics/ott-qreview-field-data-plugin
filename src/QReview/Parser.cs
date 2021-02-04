@@ -43,11 +43,11 @@ namespace QReview
 
             Appender.AddDischargeActivity(fieldVisitInfo, dischargeActivityMapper.Map(summary));
 
-            var readingsMapper = new ReadingsMapper(fieldVisitInfo);
+            var calibrationsMapper = new CalibrationsMapper(fieldVisitInfo);
 
-            foreach (var reading in readingsMapper.Map(summary))
+            foreach (var calibration in calibrationsMapper.Map(summary))
             {
-                Appender.AddReading(fieldVisitInfo, reading);
+                Appender.AddCalibration(fieldVisitInfo, calibration);
             }
         }
     }

@@ -46,7 +46,7 @@ namespace QReview.Mappers
                 EffectiveDepth = vertical.Depth,
                 VelocityObservation = GetVelocityObservation(vertical),
                 FlowDirection = FlowDirectionType.Normal,
-                Comments = string.Join("\n", vertical.Warnings)
+                Comments = string.Join("\n", vertical.QualityIssues.Concat(vertical.Warnings))
             };
         }
 

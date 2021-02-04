@@ -51,21 +51,36 @@ namespace QReview.Mappers
             var measurementPeriod = GetMeasurementPeriod();
             var dischargeActivity = factory.CreateDischargeActivity(measurementPeriod, totalDischarge);
 
-            dischargeActivity.Comments = summary.Notes;
+            dischargeActivity.Comments = string.Join("\n", summary.Notes);
             dischargeActivity.Party = summary.Operator;
-            dischargeActivity.MeasurementId = summary.MeasurementNumber;
+
+            if (!Config.IgnoreMeasurementId)
+                dischargeActivity.MeasurementId = summary.MeasurementNumber;
 
             dischargeActivity.QuantitativeUncertainty = summary.UncertaintyPercentage;
             dischargeActivity.ActiveUncertaintyType = dischargeActivity.QuantitativeUncertainty.HasValue
                 ? UncertaintyType.Quantitative
                 : UncertaintyType.None;
 
-            var qualityIssues = summary
-                .Verticals
-                .SelectMany(v => v.QualityIssues.Select(qi => $"Vertical {v.Number} at {v.Position} {unitSystem.DistanceUnitId}: {qi}"))
-                .ToList();
+            var notes = new List<string>(summary.DepthSensorNotes);
 
-            dischargeActivity.QualityAssuranceComments = string.Join("\n", qualityIssues);
+            if (summary.QualityThresholdNotes.Any())
+            {
+                if (notes.Any())
+                    notes.Add("");
+
+                notes.AddRange(summary.QualityThresholdNotes);
+            }
+
+            if (summary.FieldQualityNotes.Any())
+            {
+                if (notes.Any())
+                    notes.Add("");
+
+                notes.AddRange(summary.FieldQualityNotes);
+            }
+
+            dischargeActivity.QualityAssuranceComments = string.Join("\n", notes);
 
             if (!string.IsNullOrEmpty(summary.Quality) && Config.Grades.Any())
             {
