@@ -43,6 +43,7 @@ The JSON configuration information stores five settings:
 | --- | --- |
 | **LocationIdentifierSeparator** | A text string that will separate a location identifier from other text in the Station Name.<br/><br/>Use an empty string `""` to use the entire Station Name.<br/><br/>Defaults to an underscore `"_"` if the property is not specified.|
 | **LocationIdentifierZeroPaddedDigits** | The number of zero-padded digits to use for a numeric location identifier.<br/><br/>Defaults to `6` if the property is not specified. |
+| **IgnoreMeasurementId** | When `false`, the `Measurement Nr` field will be set as the AQTS measurement ID value, which must be unique per location.<br/>When `true`, the `Measurement Nr` field of the `Summary.TSV` file will be ignored.<br/><br/>Defaults to `false` if the property is not specified. |
 | **Grades** | How to map the QReview `Quality` property to an AQTS grade.<br/><br/>If not empty, the `Quality` value will be mapped to a `GradeCode` if it is an integer number, or to a `GradeName` otherwise. When the `Quality` value is not in the `Grades` map, the value is assumed to map 1:1 to a grade code or name.<br/><br/>If empty, no measurement grade will be assigned. |
 | **DateTimeFormats** | .NET date & time format strings for parsing the `Date/Time` summary field.<br/><br/>If empty, US-English formats will be expected. (month/day/year) |
 | **TimeFormats** | .NET time format strings for parsing times.<br/><br/>If empty, US-English formats will be expected. |
@@ -51,6 +52,7 @@ The JSON configuration information stores five settings:
 {
   "LocationIdentifierSeparator": "_",
   "LocationIdentifierZeroPaddedDigits": 6,
+  "IgnoreMeasurementId": false,
   "Grades": {
     "UNKNOWN": "POOR",
     "GOOD": "85"

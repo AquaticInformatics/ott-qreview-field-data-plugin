@@ -53,7 +53,9 @@ namespace QReview.Mappers
 
             dischargeActivity.Comments = summary.Notes;
             dischargeActivity.Party = summary.Operator;
-            dischargeActivity.MeasurementId = summary.MeasurementNumber;
+
+            if (!Config.IgnoreMeasurementId)
+                dischargeActivity.MeasurementId = summary.MeasurementNumber;
 
             dischargeActivity.QuantitativeUncertainty = summary.UncertaintyPercentage;
             dischargeActivity.ActiveUncertaintyType = dischargeActivity.QuantitativeUncertainty.HasValue
