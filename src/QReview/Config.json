@@ -1,9 +1,0 @@
-﻿{
-  "LocationIdentifierSeparator": "_",
-  "LocationIdentifierZeroPaddedDigits": 6,
-  "IgnoreMeasurementId": false,
-  "Grades": {
-  },
-  "DateTimeFormats": [],
-  "TimeFormats": []
-}

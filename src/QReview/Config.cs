@@ -4,8 +4,12 @@ namespace QReview
 {
     public class Config
     {
-        public string LocationIdentifierSeparator { get; set; } = "_";
-        public int LocationIdentifierZeroPaddedDigits { get; set; } = 6;
+        public const string DefaultLocationIdentifierSeparator = "_";
+        public const int DefaultLocationIdentifierZeroPaddedDigits = 6;
+        public const bool DefaultIgnoreMeasurementId = false;
+
+        public string LocationIdentifierSeparator { get; set; }
+        public int LocationIdentifierZeroPaddedDigits { get; set; }
         public bool IgnoreMeasurementId { get; set; }
         public Dictionary<string, string> Grades { get; set; }
         public string[] DateTimeFormats { get; set; }
