@@ -39,7 +39,10 @@ namespace QReview
         public double? MeanTemp { get; set; }
         public string Quality { get; set; }
         public double? UncertaintyPercentage { get; set; }
-        public string Notes { get; set; }
+        public List<string> DepthSensorNotes { get; } = new List<string>();
+        public List<string> QualityThresholdNotes { get; } = new List<string>();
+        public List<string> FieldQualityNotes { get; } = new List<string>();
+        public List<string> Notes { get; } = new List<string>();
         public List<VerticalSummary> Verticals { get; } = new List<VerticalSummary>();
 
         public bool IsMetric => "Metric".Equals(Units, StringComparison.InvariantCultureIgnoreCase);
@@ -98,6 +101,11 @@ namespace QReview
                     {"Time Series", SectionType.TimeSeries},
                 };
 
+                var multiFieldSectionTransitions = new Dictionary<string, SectionType>(StringComparer.InvariantCultureIgnoreCase)
+                {
+                    {"Acoustic Transducers", SectionType.AcousticTransducers},
+                };
+
                 var summaryFields =
                     new Dictionary<string, Action<string>>(StringComparer.InvariantCultureIgnoreCase)
                     {
@@ -139,9 +147,7 @@ namespace QReview
                         {"Area(ft²", s => Summary.Area = ParseNullableDouble(s)}, // Compensate for buggy QReview output
                         {"Discharge(m³/s)", s => Summary.Discharge = ParseNullableDischarge(s)},
                         {"Discharge(ft³/s)", s => Summary.Discharge = ParseNullableDischarge(s)},
-                        {
-                            "Mean Temp. (°C)", s => Summary.MeanTemp = ParseNullableDouble(s)
-                        }, // TODO: Is mean temp really always degC, even when not metric?
+                        {"Mean Temp. (°C)", s => Summary.MeanTemp = ParseNullableDouble(s)},
                         {"Quality", s => Summary.Quality = s},
                     };
 
@@ -159,6 +165,7 @@ namespace QReview
                         {SectionType.DepthSensor, (null, ParseDepthSensor)},
                         {SectionType.QualitySettings, (null, ParseQualitySettings)},
                         {SectionType.FieldQualityCheck, (null, ParseFieldQualityCheck)},
+                        {SectionType.AcousticTransducers, (null, ParseAcousticTransducers)},
                         {SectionType.Notes, (null, ParseNotes)},
                         {SectionType.ADCWarnings, (null, ParseADCWarnings)},
                         {SectionType.QualityIssues, (null, ParseQualityIssues)},
@@ -177,18 +184,15 @@ namespace QReview
                     if (Fields == null)
                         continue;
 
-                    if (Fields.Length == 1)
+                    if (Fields.Length == 1 && sectionTransitions.TryGetValue(Fields[0], out var newSectionType)
+                        || Fields.Length > 1 && multiFieldSectionTransitions.TryGetValue(Fields[0], out newSectionType))
                     {
-                        if (sectionTransitions.TryGetValue(Fields[0], out var newSectionType))
-                        {
-                            sectionType = newSectionType;
-                            continue;
-                        }
+                        sectionType = newSectionType;
+                        continue;
                     }
 
                     if (!sectionParsers.TryGetValue(sectionType, out var parser))
-                        throw new InvalidOperationException(
-                            $"Don't know how to parse line {LineNumber} ({sectionType}): {string.Join(",", Fields)}");
+                        throw new InvalidOperationException($"Don't know how to parse line {LineNumber} ({sectionType}): {string.Join(",", Fields)}");
 
                     if (!sectionsParsed.TryGetValue(sectionType, out var count))
                     {
@@ -267,6 +271,7 @@ namespace QReview
             DepthSensor,
             QualitySettings,
             FieldQualityCheck,
+            AcousticTransducers,
             Notes,
             // ReSharper disable once InconsistentNaming
             ADCWarnings,
@@ -417,27 +422,61 @@ namespace QReview
 
         private void ParseDepthSensor()
         {
+            AddFieldsAsNotes(Summary.DepthSensorNotes, "Depth Sensor");
         }
 
         private void ParseQualitySettings()
         {
+            AddFieldsAsNotes(Summary.QualityThresholdNotes, "Quality Threshold Settings");
         }
 
         private void ParseFieldQualityCheck()
+        {
+            AddFieldsAsNotes(Summary.FieldQualityNotes, "Field Quality Check");
+        }
+
+        private void AddFieldsAsNotes(List<string> notes, string sectionLabel)
+        {
+            var fields = new Queue<string>(Fields);
+
+            while (fields.Any())
+            {
+                var field = fields.Dequeue();
+
+                if (string.IsNullOrWhiteSpace(field))
+                    continue;
+
+                var value = fields.Any() ? fields.Dequeue() : null;
+
+                var note = value == null ? field : $"{field}: {value}";
+
+                if (!notes.Any())
+                    notes.Add($"{sectionLabel}:");
+
+                notes.Add(note);
+            }
+        }
+
+        private void ParseAcousticTransducers()
         {
         }
 
         private void ParseNotes()
         {
-            var note = string.Join(" ", Fields).Trim();
+            var note = GetFieldsAsText();
 
             if (string.IsNullOrEmpty(note) || SkipNoteMarkers.Contains(note))
                 return;
 
-            if (string.IsNullOrEmpty(Summary.Notes))
-                Summary.Notes = note;
-            else
-                Summary.Notes += "\n" + note;
+            if (!Summary.Notes.Any())
+                Summary.Notes.Add("Notes");
+
+            Summary.Notes.Add(note);
+        }
+
+        private string GetFieldsAsText()
+        {
+            return string.Join(" ", Fields).Trim();
         }
 
         private static readonly HashSet<string> SkipNoteMarkers =
@@ -449,6 +488,7 @@ namespace QReview
 
         private int CurrentVertical { get; set; }
 
+        // ReSharper disable once InconsistentNaming
         private void ParseADCWarnings()
         {
             var match = VerticalRegex.Match(Fields[0]);

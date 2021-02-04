@@ -1,26 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using FieldDataPluginFramework.Context;
-using FieldDataPluginFramework.DataModel;
-using FieldDataPluginFramework.DataModel.Readings;
+using FieldDataPluginFramework.DataModel.Calibrations;
 using QReview.SystemCode;
 
 namespace QReview.Mappers
 {
-    public class ReadingsMapper
+    public class CalibrationsMapper
     {
         private FieldVisitInfo FieldVisitInfo { get; }
 
-        public ReadingsMapper(FieldVisitInfo fieldVisitInfo)
+        public CalibrationsMapper(FieldVisitInfo fieldVisitInfo)
         {
             FieldVisitInfo = fieldVisitInfo ?? throw new ArgumentNullException(nameof(fieldVisitInfo));
         }
 
-        public IEnumerable<Reading> Map(DischargeMeasurementSummary summary)
+        public IEnumerable<Calibration> Map(DischargeMeasurementSummary summary)
         {
             if (summary.MeanTemp.HasValue)
             {
-                yield return new Reading(Parameters.WaterTemp, new Measurement(summary.MeanTemp.Value, Units.Celcius))
+                yield return new Calibration(Parameters.WaterTemp, Units.Celcius, summary.MeanTemp.Value)
                 {
                     DateTimeOffset = FieldVisitInfo.StartDate
                 };

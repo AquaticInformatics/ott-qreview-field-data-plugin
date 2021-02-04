@@ -53,7 +53,7 @@
     <Compile Include="Mappers\DischargeActivityMapper.cs" />
     <Compile Include="Mappers\FieldVisitMapper.cs" />
     <Compile Include="Mappers\MeterCalibrationMapper.cs" />
-    <Compile Include="Mappers\ReadingsMapper.cs" />
+    <Compile Include="Mappers\CalibrationsMapper.cs" />
     <Compile Include="Mappers\VerticalMapper.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Plugin.cs" />
